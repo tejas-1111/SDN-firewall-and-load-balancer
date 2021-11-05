@@ -3,7 +3,7 @@ from mininet.node import Controller, RemoteController, OVSKernelSwitch, IVSSwitc
 from mininet.link import Link, TCLink
 from mininet.cli import CLI
 from mininet.log import setLogLevel
-
+from mininet.util import *
 if __name__ == "__main__":
     setLogLevel('info')
     net = Mininet(controller=RemoteController, link=TCLink, switch=OVSKernelSwitch)
