@@ -6,8 +6,16 @@ from mininet.log import setLogLevel
 from mininet.util import *
 if __name__ == "__main__":
     setLogLevel('info')
-    net = Mininet(controller=RemoteController, link=TCLink, switch=OVSKernelSwitch)
-
+    #net = Mininet(controller=RemoteController, link=TCLink, switch=OVSKernelSwitch)
+    net = Mininet( topo=None,
+                   build=False,
+                   ipBase='10.0.0.0/8')
+    print( '*** Adding controller\n' )
+    c = net.addController(name='c0',
+                      controller=RemoteController,
+                      ip='127.0.0.1',
+                      protocol='tcp',
+                      port=6633)
     # Create hosts here
     print("Creating hosts")
     h1 = net.addHost( 'h1', mac='00:00:00:00:00:01', ip='10.0.0.1/8' )
@@ -41,7 +49,7 @@ if __name__ == "__main__":
     net.addLink(s3, s1)
 
     print("Starting network")
-    c = net.addController('c', controller=RemoteController)
+    #c = net.addController('c', controller=RemoteController)
     net.start()
     print("Dumping host connections")
     dumpNodeConnections(net.hosts)
