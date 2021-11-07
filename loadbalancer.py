@@ -17,7 +17,7 @@ dictReq ={}
 # This is our main class for the balancer
 class LoadBalancer(object):
 	global dictReq
-	def __init__(self, service_ip, server_ips = [],weights=[]): #initialize 10.1.2.3 and servers
+	def __init__(self, service_ip, server_ips = [],weights=[],flag=0): #initialize 10.1.2.3 and servers
 		core.openflow.addListeners(self)# hear Packet in, so we listen to connection		
 		#Initialization of different dicitonaries and other stuff
 		self.macToPort = {} 								#table to store ip mac and ouport after request
@@ -26,7 +26,7 @@ class LoadBalancer(object):
 		self.lb_real_ip=service_ip 							# the real ip of LB
 		self.server_ips=server_ips 							# a list holds the input servers 
 		self.total_servers=len(server_ips) 					#the length of the servers 
-		
+		self.flag=flag
 		self.total_weight = sum(weights) # Change to set equal to sum of weight
 		self.current_weight = 0
 		self.weights = weights # Store weights here according to ascending order of ip for all server ips
@@ -73,13 +73,13 @@ class LoadBalancer(object):
 
 
 	# Here we update the mapping dict with the new random server.
-	# def update_lb_mapping(self, client_ip): 					#update load balancing map
-	# 	if client_ip in self.client_table.keys():
-	# 		print(dictReq)
-	# 		random_server=random.choice(self.macToPort.keys())
-	# 		log.info("Redirecting to Server  %s "% random_server)
-	# 		dictReq.update({str(random_server):(dictReq[str(random_server)] + 1)})
-	# 		self.lb_map[client_ip]=random_server			#pass to a dictionary the random server and the client ip
+	def update_lb_mapping_random(self, client_ip): 					#update load balancing map
+		if client_ip in self.client_table.keys():
+			print(dictReq)
+			random_server=random.choice(self.macToPort.keys())
+			log.info("Redirecting to Server  %s "% random_server)
+			dictReq.update({str(random_server):(dictReq[str(random_server)] + 1)})
+			self.lb_map[client_ip]=random_server			#pass to a dictionary the random server and the client ip
 
 
 	def update_lb_mapping(self, client_ip): 					#update load balancing map
@@ -237,7 +237,10 @@ class LoadBalancer(object):
 				if (packet.next.dstip== self.lb_real_ip) and (packet.next.srcip not in self.macToPort.keys()) :		#check if the dest is the switch ip  and source not a server 
 					msg=of.ofp_packet_out()
 					msg.buffer_id = event.ofp.buffer_id
-					self.update_lb_mapping(packet.next.srcip)														# take source ip of the packet (the host) and update mapping
+					if self.flag!=0:
+						self.update_lb_mapping(packet.next.srcip)														# take source ip of the packet (the host) and update mapping
+					else:
+						self.update_lb_mapping_random(packet.next.srcip)
 					client_ip=packet.payload.srcip
 					server_ip=self.lb_map.get(packet.next.srcip)
 					outport=int(self.macToPort[server_ip].get('port'))
@@ -288,21 +291,27 @@ class LoadBalancer(object):
 
 #launch application with following arguments:	
 #ip: public service ip, servers: ip addresses of servers (in string format)
-def launch(ip, servers,weights): 
+def launch(ip, servers,weights="",mode=""): 
 	log.info("Loading Simple Load Balancer module")
 	server_ips = servers.replace(","," ").split()
+	flag=0
 	weights = weights.replace(","," ").split()
-	if(len(server_ips)!=len(weights)):
-		print("Please provide corresponding weights too")
-		return
-	#print(weights)
-	wt = [(server_ips[i],weights[i]) for i in range(len(server_ips))]
-	wt.sort()
-	for i in range(len(wt)):
-		server_ips[i],weights[i]=wt[i]
+	weights = [int(x) for x in weights]
+	if(mode!="random"):
+		flag=1
+		
+		if(len(server_ips)!=len(weights)):
+			print("Please provide corresponding weights too")
+			return
+		#print(weights)
+		wt = [(server_ips[i],weights[i]) for i in range(len(server_ips))]
+		wt.sort()
+		for i in range(len(wt)):
+			server_ips[i],weights[i]=wt[i]
+	
 	for i in server_ips:
 		dictReq[i]=0
+	
 	server_ips = [IPAddr(x) for x in server_ips]
-	weights = [int(x) for x in weights]
 	service_ip = IPAddr(ip)
-	core.registerNew(LoadBalancer, service_ip, server_ips,weights)
+	core.registerNew(LoadBalancer, service_ip, server_ips,weights,flag)
