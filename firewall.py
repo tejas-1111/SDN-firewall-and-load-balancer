@@ -119,9 +119,10 @@ class Firewall(object):
     """
     Handle packet in messages from the switch to implement above algorithm.
     """
+
     packet = event.parsed
     inport = event.port
-
+    #print(packet)
     def flood (message = None):
       """ Floods the packet """
       msg = of.ofp_packet_out()
@@ -175,8 +176,10 @@ class Firewall(object):
     #log.debug("Connection ID: %s" % dpidstr)
 
     if isinstance(packet.next, ipv4):
-      log.debug("%i IP %s => %s", inport, packet.next.srcip,packet.next.dstip)
+      log.debug("%i IP %s => %s , in switch %s", inport, packet.next.srcip,packet.next.dstip,dpidstr)
       segmant = packet.find('tcp')
+      if segmant is None:
+        segmant = packet.find('udp')
       if segmant is not None:
         # Check the Firewall Rules in MAC, IPv4 and TCP Layer
         if self.CheckRule(dpidstr, packet.src, packet.next.srcip, packet.next.dstip, segmant.dstport) == True:
