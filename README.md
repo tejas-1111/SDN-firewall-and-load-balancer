@@ -145,3 +145,17 @@ Testing L4 rule by sending udp packets over ports 80 and 5001
 
 ![firewall-2](./images/firewall-2.png)
 
+---
+
+
+
+Running loadbalancer with `random` mode
+
+![random](./images/random.png)
+
+Running loadbalancer with `round robin` mode (weighted round robin with equal weights)
+![rr](./images/rr.png)
+
+Running loadbalancer with `weighted round robin` mode
+![wrr](./images/wrr.png)
+
