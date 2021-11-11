@@ -112,7 +112,7 @@ class LoadBalancer(object):
 		r.opcode = r.REPLY				# the packet has Reply type 
 
 		r.hwdst = packet.src  
-		r.hwsrc =requested_mac				#fake mac
+		r.hwsrc =requested_mac				
 		
 		r.protosrc = packet.payload.protodst 
 		r.protodst = packet.payload.protosrc
@@ -139,7 +139,7 @@ class LoadBalancer(object):
 		ar.opcode = ar.REQUEST
 		ar.hwdst = self.ethernet_broad 		# broadcast to all possible  interfaces
 		ar.protodst = ip 					#ip dest to send 
-		ar.hwsrc = self.lb_mac 				#fake mac address
+		ar.hwsrc = self.lb_mac 				
 		ar.protosrc = self.lb_real_ip 		# the real ip of the address
 
 											# packet has inside it the r packet 
