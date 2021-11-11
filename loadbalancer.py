@@ -35,7 +35,7 @@ class LoadBalancer(object):
 
 	#Connect the controller with the switch and flood servers with arp requests.
 	def _handle_ConnectionUp(self, event): 					#new switch connection
-		self.lb_mac = EthAddr("0A:00:00:00:00:01") 			#fake mac of load balancer
+		self.lb_mac = EthAddr("0A:00:00:00:00:01") 			
 		self.connection = event.connection
 		self.ethernet_broad=EthAddr("ff:ff:ff:ff:ff:ff") 	#broadcast MAC to transmit to all possible interfaces 
 		for ip in self.server_ips:
@@ -46,12 +46,6 @@ class LoadBalancer(object):
 	# The plot work is done here, after we quit mininet.	
 	def _handle_ConnectionDown (self, event): 
 		N = self.total_servers
-		# count1 = dictReq['10.0.0.5']
-		# count2 = dictReq['10.0.0.6']
-		# count3 = dictReq['10.0.0.7']
-		# count4 = dictReq['10.0.0.8']
-
-		#Counter = (count1, count2, count3, count4)
 		std = (0, 0, 0, 0)
 
 		ind = np.arange(N)  # the x locations for the groups
@@ -84,7 +78,6 @@ class LoadBalancer(object):
 
 	def update_lb_mapping(self, client_ip): 					#update load balancing map
 	
-	# To change here
 		if client_ip in self.client_table.keys():
 			if self.current_weight == self.total_weight:
 				self.current_sends = [0 for i in range(self.total_servers)]
