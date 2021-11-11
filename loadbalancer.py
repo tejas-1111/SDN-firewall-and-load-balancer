@@ -33,14 +33,13 @@ class LoadBalancer(object):
 		self.current_sends = [0 for i in range(self.total_servers)]
 		self.current_server_index = 0
 
-	#Connect the controller with the switch and flood servers with arp requests.
-	def _handle_ConnectionUp(self, event): 					#new switch connection
+	def _handle_ConnectionUp(self, event): 					
 		self.lb_mac = EthAddr("0A:00:00:00:00:01") 			
 		self.connection = event.connection
 		self.ethernet_broad=EthAddr("ff:ff:ff:ff:ff:ff") 	#broadcast MAC to transmit to all possible interfaces 
 		for ip in self.server_ips:
 			selected_server_ip= ip
-			self.send_proxied_arp_request(self.connection,selected_server_ip) # here will flood ARP requests to all serveres to match Ips with mac and ports 
+			self.send_proxied_arp_request(self.connection,selected_server_ip) 
 	
 
 	# The plot work is done here, after we quit mininet.	
