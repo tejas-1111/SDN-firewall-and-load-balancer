@@ -151,24 +151,21 @@ class LoadBalancer(object):
 						server_ip, buffer_id=of.NO_BUFFER):				
 		self.install_flow_rule_server_to_client(connection, event.port, server_ip,client_ip)
 		
-		msg=of.ofp_flow_mod() 				# the way the message will be send 
+		msg=of.ofp_flow_mod() 				 
 		msg.idle_timeout=3
-		msg.hard_timeout=1				# if not this link not used afte 10sec delete  rule from flow
-		msg.command=of.OFPFC_ADD			# tell the switch to add rule 
-		msg.buffer_id=buffer_id				#set the buffer
-		
-											# what data will have the packet in 
-											# match the message
-		msg.match.dl_type=ethernet.IP_TYPE	# match the type to be IP type		
-		msg.match.nw_src=client_ip 			# match the msg network source ip for the rule
-		msg.match.nw_dst=self.lb_real_ip	# match the msg  networkdst ip  for the rule 
+		msg.hard_timeout=1				
+		msg.command=of.OFPFC_ADD			
+		msg.buffer_id=buffer_id							 									
+		msg.match.dl_type=ethernet.IP_TYPE			
+		msg.match.nw_src=client_ip 			
+		msg.match.nw_dst=self.lb_real_ip	 
 
-		msg.actions.append(of.ofp_action_dl_addr.set_src(self.lb_mac)) 		#from which mac the msg will be send (fake mac)
-		msg.actions.append(of.ofp_action_dl_addr.set_dst(self.macToPort[server_ip].get('server_mac'))) #the servers eth address
+		msg.actions.append(of.ofp_action_dl_addr.set_src(self.lb_mac)) 		
+		msg.actions.append(of.ofp_action_dl_addr.set_dst(self.macToPort[server_ip].get('server_mac')))
 		
-		msg.actions.append(of.ofp_action_nw_addr.set_dst(server_ip)) 		# will send he packet to this server ip 		
+		msg.actions.append(of.ofp_action_nw_addr.set_dst(server_ip)) 				
 		
-		msg.actions.append(of.ofp_action_output(port=outport)) 				#the port which the packet will pass 
+		msg.actions.append(of.ofp_action_output(port=outport)) 			
 		
 		self.connection.send(msg)
 
